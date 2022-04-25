@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph.xml"
+    app:startDestination="@id/wheatherFragment">
+
+    <fragment
+        android:id="@+id/wheatherFragment"
+        android:name="com.example.weatherapp.ui.weatherFragment.WheatherFragment"
+        android:label="fragment_wheather"
+        tools:layout="@layout/fragment_wheather" />
+</navigation>
