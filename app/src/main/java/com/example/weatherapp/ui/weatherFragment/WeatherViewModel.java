@@ -9,14 +9,25 @@ import com.example.weatherapp.App;
 import com.example.weatherapp.common.Resource;
 import com.example.weatherapp.data.WeatherAppApi;
 import com.example.weatherapp.models.Root;
+import com.example.weatherapp.repsitories.Repository;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class WeatherViewModel extends ViewModel {
 
     public LiveData<Resource<Root>> liveData;
-    WeatherAppApi api;
 
+    private final Repository repository;
+
+    @Inject
+    public WeatherViewModel(Repository repository) {
+        this.repository = repository;
+    }
 
     public void getWeatherByCityName(String city){
-        liveData = App.repository.getWeatherInRussianByCityName(city);
+        liveData = repository.getWeatherInRussianByCityName(city);
     }
 }

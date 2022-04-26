@@ -7,6 +7,8 @@ import com.example.weatherapp.common.Resource;
 import com.example.weatherapp.data.WeatherAppApi;
 import com.example.weatherapp.models.Root;
 
+import javax.inject.Inject;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -16,12 +18,12 @@ public class Repository {
     private final String appIdKey = "9cf9459f078b5c949a18e7802541c42b";
     private final String units = "metric";
 
+    @Inject
     public Repository(WeatherAppApi api) {
         this.api=api;
     }
 
     public MutableLiveData<Resource<Root>> getWeatherInRussianByCityName(String city){
-        System.out.println("---------3-----------");
         MutableLiveData<Resource<Root>> liveData = new MutableLiveData<>();
         liveData.setValue(Resource.loading());
         api.getWeatherInRussianByCityName(city, appIdKey, units).enqueue(new Callback<Root>() {

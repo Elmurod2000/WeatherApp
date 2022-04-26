@@ -6,6 +6,9 @@ import android.os.Bundle;
 
 import com.example.weatherapp.databinding.ActivityMainBinding;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
 

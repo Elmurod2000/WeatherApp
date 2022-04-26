@@ -8,6 +8,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +17,7 @@ import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.example.weatherapp.R;
+import com.example.weatherapp.base.BaseFragment;
 import com.example.weatherapp.common.Resource;
 import com.example.weatherapp.databinding.FragmentWheatherBinding;
 import com.example.weatherapp.models.Root;
@@ -26,11 +29,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
+import dagger.hilt.android.AndroidEntryPoint;
 
-public class WheatherFragment extends Fragment {
+@AndroidEntryPoint
+public class WheatherFragment extends BaseFragment<FragmentWheatherBinding> {
     private WeatherViewModel viewModel;
-    private FragmentWheatherBinding binding;
-
+    private WheatherFragmentArgs args;
 
     public WheatherFragment() {
 
@@ -39,20 +43,36 @@ public class WheatherFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        args=WheatherFragmentArgs.fromBundle(getArguments());
         viewModel = new ViewModelProvider(requireActivity()).get(WeatherViewModel.class);
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        binding=FragmentWheatherBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+    protected FragmentWheatherBinding bind() {
+        return FragmentWheatherBinding.inflate(getLayoutInflater());
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        viewModel.getWeatherByCityName("Bishkek");
+    protected void setupViews() {
+    }
+
+    @Override
+    protected void callRequests() {
+        viewModel.getWeatherByCityName(args.getArgs());
+    }
+
+    @Override
+    protected void setupListener() {
+        binding.textCity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navController.navigate(R.id.action_wheatherFragment_to_chooseFragment);
+            }
+        });
+    }
+
+    @Override
+    protected void setupObserver() {
         viewModel.liveData.observe(getViewLifecycleOwner(), new Observer<Resource<Root>>() {
             @Override
             public void onChanged(Resource<Root> rootResp) {
@@ -83,7 +103,6 @@ public class WheatherFragment extends Fragment {
                 }
             }
         });
-
     }
 
     int i = 0;
