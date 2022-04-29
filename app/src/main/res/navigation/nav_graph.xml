@@ -17,7 +17,7 @@
             android:name="args"
             app:argType="string"
             app:nullable="true"
-            android:defaultValue="Bishkek"/>
+            android:defaultValue="12"/>
     </fragment>
     <fragment
         android:id="@+id/chooseFragment"

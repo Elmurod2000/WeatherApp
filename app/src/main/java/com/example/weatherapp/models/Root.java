@@ -1,51 +1,92 @@
 
 package com.example.weatherapp.models;
 
+import androidx.room.Embedded;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
 import java.util.List;
+
+import com.example.weatherapp.converters.rConverter;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+@Entity
 public class Root {
 
-    @SerializedName("coord")
-    @Expose
-    private Coord coord;
-    @SerializedName("weather")
-    @Expose
-    private List<Weather> weather = null;
-    @SerializedName("base")
-    @Expose
-    private String base;
-    @SerializedName("main")
-    @Expose
-    private Main main;
-    @SerializedName("visibility")
-    @Expose
-    private Integer visibility;
-    @SerializedName("wind")
-    @Expose
-    private Wind wind;
-    @SerializedName("clouds")
-    @Expose
-    private Clouds clouds;
-    @SerializedName("dt")
-    @Expose
-    private Integer dt;
-    @SerializedName("sys")
-    @Expose
-    private Sys sys;
-    @SerializedName("timezone")
-    @Expose
-    private Integer timezone;
     @SerializedName("id")
     @Expose
-    private Integer id;
+    @PrimaryKey
+    private int id;
+    private long createdAt;
+    @SerializedName("dt")
+    @Expose
+    private int dt;
+    @SerializedName("timezone")
+    @Expose
+    private int timezone;
     @SerializedName("name")
     @Expose
     private String name;
+
+
+    @SerializedName("coord")
+    @Expose
+    @Embedded
+    private Coord coord;
+    @SerializedName("main")
+    @Expose
+    @Embedded
+    private Main main;
+    @SerializedName("wind")
+    @Expose
+    @Embedded
+    private Wind wind;
+    @SerializedName("sys")
+    @Expose
+    @Embedded
+    private Sys sys;
+
+    @SerializedName("weather")
+    @Expose
+    @TypeConverters({rConverter.class})
+    private List<Weather> weather = null;
+
+
+    @SerializedName("clouds")
+    @Expose
+    @Ignore
+    private Clouds clouds;
+    @SerializedName("base")
+    @Expose
+    @Ignore
+    private String base;
+    @SerializedName("visibility")
+    @Expose
+    @Ignore
+    private Integer visibility;
     @SerializedName("cod")
     @Expose
+    @Ignore
     private Integer cod;
+
+
+    public Root() {
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
+    }
 
     public Coord getCoord() {
         return coord;
@@ -129,10 +170,6 @@ public class Root {
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getName() {

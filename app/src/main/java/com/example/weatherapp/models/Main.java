@@ -31,8 +31,8 @@ public class Main {
     @Expose
     private Integer grndLevel;
 
-    public int getTemp() {
-        return (int) temp;
+    public double getTemp() {
+        return  temp;
     }
 
     public void setTemp(double temp) {
@@ -47,16 +47,16 @@ public class Main {
         this.feelsLike = feelsLike;
     }
 
-    public int getTempMin() {
-        return (int) tempMin;
+    public double getTempMin() {
+        return tempMin;
     }
 
     public void setTempMin(double tempMin) {
         this.tempMin = tempMin;
     }
 
-    public int getTempMax() {
-        return (int) tempMax;
+    public double getTempMax() {
+        return tempMax;
     }
 
     public void setTempMax(double tempMax) {

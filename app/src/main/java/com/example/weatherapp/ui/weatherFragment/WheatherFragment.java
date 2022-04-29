@@ -1,19 +1,15 @@
 package com.example.weatherapp.ui.weatherFragment;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.example.weatherapp.R;
@@ -21,13 +17,13 @@ import com.example.weatherapp.base.BaseFragment;
 import com.example.weatherapp.common.Resource;
 import com.example.weatherapp.databinding.FragmentWheatherBinding;
 import com.example.weatherapp.models.Root;
-import com.example.weatherapp.repsitories.Repository;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Objects;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -58,7 +54,11 @@ public class WheatherFragment extends BaseFragment<FragmentWheatherBinding> {
 
     @Override
     protected void callRequests() {
-        viewModel.getWeatherByCityName(args.getArgs());
+        if (args.getArgs().equals("12")){
+            viewModel.getWeatherByCityName("Bishkek");
+        } else {
+            viewModel.getWeatherByCityName(args.getArgs());
+        }
     }
 
     @Override
@@ -73,40 +73,93 @@ public class WheatherFragment extends BaseFragment<FragmentWheatherBinding> {
 
     @Override
     protected void setupObserver() {
-        viewModel.liveData.observe(getViewLifecycleOwner(), new Observer<Resource<Root>>() {
-            @Override
-            public void onChanged(Resource<Root> rootResp) {
-                switch (rootResp.status) {
-                    case SUCCESS: {
-                        binding.constraintlayout.setVisibility(View.VISIBLE);
-                        binding.progress.setVisibility(View.GONE);
-                        try {
-                            setViews(rootResp.data);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+        if (viewModel.liveData!=null) {
+            viewModel.liveData.observe(getViewLifecycleOwner(), new Observer<Resource<Root>>() {
+                @Override
+                public void onChanged(Resource<Root> rootResp) {
+                    switch (rootResp.status) {
+                        case SUCCESS: {
+                            binding.constraintlayout.setVisibility(View.VISIBLE);
+                            binding.progress.setVisibility(View.GONE);
+                            try {
+                                setViews(rootResp.data);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case ERROR: {
-                        binding.constraintlayout.setVisibility(View.GONE);
-                        binding.progress.setVisibility(View.GONE);
-                        Snackbar.make(binding.getRoot(), rootResp.msc,
-                                BaseTransientBottomBar.LENGTH_LONG)
-                                .show();
-                        break;
-                    }
-                    case LOADING: {
-                        binding.constraintlayout.setVisibility(View.GONE);
-                        binding.progress.setVisibility(View.VISIBLE);
-                        break;
+                        case ERROR: {
+                            binding.constraintlayout.setVisibility(View.GONE);
+                            binding.progress.setVisibility(View.GONE);
+                            if (!checkInternetConnection()) {
+                                try {
+                                    getCurrentWeatherFromRoom(Objects.requireNonNull(args.getArgs()));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            Snackbar.make(binding.getRoot(), rootResp.msc,
+                                    BaseTransientBottomBar.LENGTH_LONG)
+                                    .show();
+                            break;
+                        }
+                        case LOADING: {
+                            binding.constraintlayout.setVisibility(View.GONE);
+                            binding.progress.setVisibility(View.VISIBLE);
+                            break;
+                        }
                     }
                 }
-            }
-        });
+            });
+        } else {
+            getCurrentWeatherFromRoom("");
+        }
+    }
+
+    private void getCurrentWeatherFromRoom(String s) {
+        if (!s.equals("")){
+            viewModel.getLocalCurrentWeather(s);
+        }else {
+            viewModel.getLocalLastMainResponse();
+        }
+        viewModel.liveDataRoom.observe(getViewLifecycleOwner(),
+                cR -> {
+                    switch (cR.status) {
+                        case SUCCESS: {
+                            binding.constraintlayout.setVisibility(View.VISIBLE);
+                            binding.progress.setVisibility(View.GONE);
+                            if (cR.data.size() > 0 && cR.data!=null) {
+                                setViews(cR.data.get(0));
+                            }
+                            break;
+                        }
+                        case ERROR: {
+                            binding.constraintlayout.setVisibility(View.GONE);
+                            binding.progress.setVisibility(View.GONE);
+                            Snackbar.make(binding.getRoot(), cR.msc,
+                                    BaseTransientBottomBar.LENGTH_LONG)
+                                    .show();
+                            break;
+                        }
+                        case LOADING: {
+                            binding.constraintlayout.setVisibility(View.GONE);
+                            binding.progress.setVisibility(View.VISIBLE);
+                            break;
+                        }
+                    }
+                });
+    }
+
+    public boolean checkInternetConnection() {
+        ConnectivityManager cm = (ConnectivityManager) requireContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetworkInfo = cm.getActiveNetworkInfo();
+        return (activeNetworkInfo != null && activeNetworkInfo.isAvailable()
+                && activeNetworkInfo.isConnected());
     }
 
     int i = 0;
-
     private String getDate(long updatedAt, String dateFormat) {
         SimpleDateFormat format = new SimpleDateFormat(dateFormat, Locale.ENGLISH);
         Calendar calendar = Calendar.getInstance();
@@ -133,9 +186,9 @@ public class WheatherFragment extends BaseFragment<FragmentWheatherBinding> {
                 .into(binding.ivCloud);
         binding.tvWeather.setText(mainResponse.getWeather().get(0).getMain());
 
-        int temp= mainResponse.getMain().getTemp();
-        int maxTemp = mainResponse.getMain().getTempMax();
-        int minTemp = mainResponse.getMain().getTempMin();
+        int temp= (int) mainResponse.getMain().getTemp();
+        int maxTemp = (int) mainResponse.getMain().getTempMax();
+        int minTemp = (int) mainResponse.getMain().getTempMin();
 
         binding.tvTextemp.setText(String.valueOf(temp));
         binding.tvMaxTemp.setText(String.valueOf(maxTemp));

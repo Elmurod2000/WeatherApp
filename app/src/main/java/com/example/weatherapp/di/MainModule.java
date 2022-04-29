@@ -1,8 +1,13 @@
 package com.example.weatherapp.di;
 
+import android.app.Application;
+
 import androidx.lifecycle.ViewModel;
+import androidx.room.Room;
 
 import com.example.weatherapp.data.WeatherAppApi;
+import com.example.weatherapp.local.RootDao;
+import com.example.weatherapp.local.RootDatabase;
 import com.example.weatherapp.repsitories.Repository;
 
 import javax.inject.Singleton;
@@ -48,8 +53,23 @@ public abstract class MainModule {
 
     @Provides
     @Singleton
-    public static Repository provideApiRepository(WeatherAppApi api){
-        return new Repository(api);
+    public static RootDatabase provideDatabase(Application context){
+        return Room.databaseBuilder(context.getApplicationContext(),
+                RootDatabase.class, "weather")
+                .fallbackToDestructiveMigration()
+                .allowMainThreadQueries()
+                .build();
     }
 
+    @Provides
+    @Singleton
+    public static RootDao provideDoa(RootDatabase database){
+        return database.rootDao();
+    }
+
+    @Provides
+    @Singleton
+    public static Repository provideApiRepository(WeatherAppApi api, RootDao dao){
+        return new Repository(api, dao);
+    }
 }

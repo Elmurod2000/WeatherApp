@@ -1,6 +1,8 @@
 
 package com.example.weatherapp.models;
 
+import androidx.room.Ignore;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -11,6 +13,7 @@ public class Sys {
     private Integer type;
     @SerializedName("id")
     @Expose
+    @Ignore
     private Integer id;
     @SerializedName("country")
     @Expose
